@@ -1,14 +1,62 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"math"
+	"sync"
+	"unicode"
 
 	"golang.org/x/tour/pic"
 )
 
 func main() {
-	exercise02()
+	exercise03()
+}
+
+func exercise03() {
+	wc := WordCount("hello! this is a test to see if the word count is correct or not.")
+	fmt.Println(wc)
+}
+
+// WordCount calculates the number of words in a string.
+func WordCount(str string) map[string]int {
+	counts := make(map[string]int)
+	ws, wait := words(str)
+	for wrd, ok := <-ws; ok; wrd, ok = <-ws {
+		count, exists := counts[wrd]
+		if !exists {
+			counts[wrd] = 1
+		} else {
+			counts[wrd] = count + 1
+		}
+
+	}
+	wait()
+	return counts
+}
+
+func words(str string) (yield chan string, wait func()) {
+	var wg sync.WaitGroup
+	wait = wg.Wait
+	yield = make(chan string)
+	var buffer bytes.Buffer
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for _, ch := range str {
+			if unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '_' {
+				buffer.WriteRune(ch)
+				continue
+			}
+			if buffer.Len() > 0 {
+				yield <- string(buffer.Bytes())
+				buffer.Reset()
+			}
+		}
+		close(yield)
+	}()
+	return yield, wait
 }
 
 func exercise02() {
