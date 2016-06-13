@@ -54,6 +54,10 @@ func words(str string) (yield chan string, wait func()) {
 				buffer.Reset()
 			}
 		}
+		if buffer.Len() > 0 {
+			yield <- string(buffer.Bytes())
+			buffer.Reset()
+		}
 		close(yield)
 	}()
 	return yield, wait
