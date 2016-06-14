@@ -34,7 +34,7 @@ func fibonacci() func() int {
 			result = 0
 		} else if n == 1 {
 			result = 1
-		} else if n > 1 {
+		} else {
 			result = cache[n-1] + cache[n-2]
 		}
 		return result
