@@ -27,18 +27,15 @@ func fibonacci() func() int {
 	cache := make(map[int]int)
 	cache[0] = 0
 	cache[1] = 1
-	memoize := func() {
-		cache[n] = result
-		n++
-	}
+	memoize := func() { cache[n] = result; n++ }
 	return func() int {
 		defer memoize()
-		if n > 1 {
-			result = cache[n-1] + cache[n-2]
-		} else if n == 0 {
+		if n <= 0 {
 			result = 0
 		} else if n == 1 {
 			result = 1
+		} else if n > 1 {
+			result = cache[n-1] + cache[n-2]
 		}
 		return result
 	}
