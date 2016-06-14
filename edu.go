@@ -11,7 +11,37 @@ import (
 )
 
 func main() {
-	exercise03()
+	exercise04()
+}
+
+func exercise04() {
+	f := fibonacci()
+	for i := 0; i < 100; i++ {
+		fmt.Println(f())
+	}
+}
+
+func fibonacci() func() int {
+	n := 0
+	result := 0
+	cache := make(map[int]int)
+	cache[0] = 0
+	cache[1] = 1
+	memoize := func() {
+		cache[n] = result
+		n++
+	}
+	return func() int {
+		defer memoize()
+		if n > 1 {
+			result = cache[n-1] + cache[n-2]
+		} else if n == 0 {
+			result = 0
+		} else if n == 1 {
+			result = 1
+		}
+		return result
+	}
 }
 
 func exercise03() {
