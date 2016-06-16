@@ -4,32 +4,30 @@ import (
 	"bytes"
 	"fmt"
 	"math"
-	"sync"
 	"unicode"
 
 	"golang.org/x/tour/pic"
 )
 
 func main() {
+	exercise03()
 	exercise04()
 }
 
 func exercise04() {
 	f := fibonacci()
-	for i := 0; i < 100; i++ {
-		fmt.Println(f())
+	for i := int64(0); i < 50; i++ {
+		fmt.Println(f(i))
 	}
 }
 
-func fibonacci() func() int {
-	n := 0
-	result := 0
-	cache := make(map[int]int)
+func fibonacci() func(int64) int64 {
+	cache := make(map[int64]int64)
 	cache[0] = 0
 	cache[1] = 1
-	memoize := func() { cache[n] = result; n++ }
-	return func() int {
-		defer memoize()
+	return func(n int64) int64 {
+		result := int64(0)
+		defer func() { cache[n] = result; n++ }()
 		if n <= 0 {
 			result = 0
 		} else if n == 1 {
@@ -49,8 +47,8 @@ func exercise03() {
 // WordCount calculates the number of words in a string.
 func WordCount(str string) map[string]int {
 	counts := make(map[string]int)
-	ws, wait := words(str)
-	for wrd, ok := <-ws; ok; wrd, ok = <-ws {
+	iterator := wordIterator(str)
+	for wrd, ok := iterator(); ok; wrd, ok = iterator() {
 		count, exists := counts[wrd]
 		if !exists {
 			counts[wrd] = 1
@@ -59,35 +57,31 @@ func WordCount(str string) map[string]int {
 		}
 
 	}
-	wait()
 	return counts
 }
 
-func words(str string) (yield chan string, wait func()) {
-	var wg sync.WaitGroup
-	wait = wg.Wait
-	yield = make(chan string)
+func wordIterator(str string) func() (string, bool) {
 	var buffer bytes.Buffer
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for _, ch := range str {
+	i := 0
+	var runes = []rune(str)
+	return func() (string, bool) {
+		for ; i < len(runes); i++ {
+			ch := runes[i]
 			if unicode.IsLetter(ch) || unicode.IsDigit(ch) || ch == '_' {
 				buffer.WriteRune(ch)
-				continue
-			}
-			if buffer.Len() > 0 {
-				yield <- string(buffer.Bytes())
+			} else if buffer.Len() > 0 {
+				token := string(buffer.Bytes())
 				buffer.Reset()
+				return token, true
 			}
 		}
 		if buffer.Len() > 0 {
-			yield <- string(buffer.Bytes())
+			token := string(buffer.Bytes())
 			buffer.Reset()
+			return token, true
 		}
-		close(yield)
-	}()
-	return yield, wait
+		return "", false
+	}
 }
 
 func exercise02() {
