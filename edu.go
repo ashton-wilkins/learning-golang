@@ -90,7 +90,7 @@ func exercise02() {
 	}))
 }
 
-// GraphExtension TODO comment this
+// GraphExtension graphs an arbitrary x,y function
 func GraphExtension(dx, dy int, fn func(x, y int) uint8) func(int, int) [][]uint8 {
 	return func(dx, dy int) [][]uint8 {
 		ys := make([][]uint8, dy)
