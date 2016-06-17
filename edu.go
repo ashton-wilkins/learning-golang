@@ -4,14 +4,55 @@ import (
 	"bytes"
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 	"unicode"
 
 	"golang.org/x/tour/pic"
 )
 
+// IPAddr represents a 4-byte IP address
+type IPAddr [4]byte
+
 func main() {
+	exercise01()
+	exercise02()
 	exercise03()
 	exercise04()
+	exercise05()
+}
+
+func exercise05() {
+	hosts := map[string]IPAddr{
+		"loopback":  {127, 0, 0, 1},
+		"googleDNS": {8, 8, 8, 8},
+	}
+	for name, ip := range hosts {
+		fmt.Printf("%v: %v\n", name, ip)
+	}
+}
+
+func (ip IPAddr) String() string {
+	strs := []string{
+		byteToString(ip[0]),
+		byteToString(ip[1]),
+		byteToString(ip[2]),
+		byteToString(ip[3])}
+	return strings.Join(strs, ".")
+}
+
+func iter(anys []interface{}) func() (interface{}, bool) {
+	i := 0
+	return func() (interface{}, bool) {
+		for ; i < len(anys); i++ {
+			return anys[i], true
+		}
+		return nil, false
+	}
+}
+
+func byteToString(b byte) string {
+	return strconv.Itoa(int(b))
 }
 
 func exercise04() {
@@ -55,7 +96,6 @@ func WordCount(str string) map[string]int {
 		} else {
 			counts[wrd] = count + 1
 		}
-
 	}
 	return counts
 }
@@ -91,15 +131,15 @@ func exercise02() {
 }
 
 // GraphExtension graphs an arbitrary x,y function
-func GraphExtension(dx, dy int, fn func(x, y int) uint8) func(int, int) [][]uint8 {
-	return func(dx, dy int) [][]uint8 {
-		ys := make([][]uint8, dy)
-		for y := 0; y < dy; y++ {
-			xs := make([]uint8, dx)
-			ys[y] = xs
-			for x := 0; x < dx; x++ {
+func GraphExtension(width, height int, fn func(x, y int) uint8) func(int, int) [][]uint8 {
+	return func(width, height int) [][]uint8 {
+		ys := make([][]uint8, height)
+		for y := 0; y < height; y++ {
+			xs := make([]uint8, width)
+			for x := 0; x < width; x++ {
 				xs = append(xs, fn(x, y))
 			}
+			ys[y] = xs
 		}
 		return ys
 	}
