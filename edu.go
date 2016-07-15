@@ -14,12 +14,39 @@ import (
 // IPAddr represents a 4-byte IP address
 type IPAddr [4]byte
 
+// ErrNegativeSqrt is raised by trying to take the square root of a negative number.
+type ErrNegativeSqrt float64
+
 func main() {
 	exercise01()
 	exercise02()
 	exercise03()
 	exercise04()
 	exercise05()
+	exercise06()
+	exercise07()
+}
+
+// MyReader - Reads an infinite number of 'A' bytes
+type MyReader struct{}
+
+func (r MyReader) Read(p []byte) (int, error) {
+	for i := range p {
+		p[i] = 'A'
+	}
+	return len(p), nil
+}
+
+func exercise07() {
+
+}
+
+func exercise06() {
+	Sqrt(-2, retry10Times)
+}
+
+func (e ErrNegativeSqrt) Error() string {
+	return fmt.Sprint("cannot Sqrt negative number: ", float64(e))
 }
 
 func exercise05() {
@@ -156,7 +183,10 @@ func exercise01() {
 }
 
 // Sqrt computes square root of a number.
-func Sqrt(x float64, terminate func(int, float64, float64) bool) float64 {
+func Sqrt(x float64, terminate func(int, float64, float64) bool) (float64, error) {
+	if x < 0 {
+		return 0, ErrNegativeSqrt(x)
+	}
 	var z0, z1 float64
 	z0 = x
 	z1 = z0
@@ -164,7 +194,7 @@ func Sqrt(x float64, terminate func(int, float64, float64) bool) float64 {
 		z0 = z1
 		z1 = newton(z0, x)
 	}
-	return z1
+	return z1, nil
 }
 
 func retry10Times(i int, z0, z1 float64) bool {
